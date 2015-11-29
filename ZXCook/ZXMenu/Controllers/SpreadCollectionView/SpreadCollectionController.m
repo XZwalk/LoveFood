@@ -9,7 +9,7 @@
 
 
 /*
-之前的大bug是由于我写了一个cell的isHidden属性, 但是这个属性和系统重名, UIView有一个isHidden属性, 导致刷新之后, cell在重用的时候出问题, 也就是布局错乱,  以至于不响应方法
+ 之前的大bug是由于我写了一个cell的isHidden属性, 但是这个属性和系统重名, UIView有一个isHidden属性, 导致刷新之后, cell在重用的时候出问题, 也就是布局错乱,  以至于不响应方法
  */
 
 
@@ -21,7 +21,7 @@
 #import "MainModel.h"
 #import "DetailModel.h"
 #import "UIImageView+WebCache.h"
-
+#import "AFNetworking.h"
 
 @interface SpreadCollectionController ()
 
@@ -61,7 +61,7 @@
     
     //注册cell
     [self.collectionView  registerClass:[CollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
-
+    
     //注册页脚
     [self.collectionView registerClass:[FooterView class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"footer"];
     
@@ -145,7 +145,7 @@
             return self.listAry.count % kItem_Number;
         }
         
-//        NSLog(@"%ld####%ld", self.listAry.count / kItem_Number, self.listAry.count % kItem_Number);
+        //        NSLog(@"%ld####%ld", self.listAry.count / kItem_Number, self.listAry.count % kItem_Number);
         
         //其他情况返回正常的个数
         return kItem_Number;
@@ -230,39 +230,38 @@
 
 - (void)getDataFromServe
 {
-    NSString *urlStr = @"http://121.41.117.95:80/HandheldKitchen/api/home/tblAssort!getFirstgrade.do";
+    NSString *urlStr = @"http://121.41.88.115:80/HandheldKitchen/api/home/tblAssort!getFirstgrade.do";
     
-    NSURL *url = [NSURL URLWithString:urlStr];
+    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/html"];
     
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    //这两句不写请求不到数据
+    manager.requestSerializer = [AFJSONRequestSerializer serializer];
+    manager.responseSerializer = [AFJSONResponseSerializer serializer];
     
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+    [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
-        if (data) {
-        
-            NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+        if ([responseObject isKindOfClass:[NSDictionary class]]) {
             
-            
-            NSArray *dataAry = dic[@"data"];
-            
+            NSArray *dataAry = responseObject[@"data"];
             
             for (NSDictionary *dic1 in dataAry) {
                 
                 MainModel *main = [[MainModel alloc] init];
                 
                 [main setValuesForKeysWithDictionary:dic1];
-   
+                
                 NSArray *deleteAry = @[@"对症食疗", @"食材大全", @"家电佳肴", @"厨娘私房菜"];
                 
 #warning mark - 破Xcode, 不给提示, 让老子以为不能这么写呢, 肯定是可以这样判断的, 不过写成上面的方式是不是更清晰一点呢😊
                 /*
-                
-                if ([main.name isEqualToString:@"对症食疗"] || [main.name isEqualToString:@"食材大全"] || [main.name isEqualToString:@"家电佳肴"] || [main.name isEqualToString:@"厨娘私房菜"]) {
-                    
-                } else {
-                    [self.listAry addObject:main];
-
-                }
+                 
+                 if ([main.name isEqualToString:@"对症食疗"] || [main.name isEqualToString:@"食材大全"] || [main.name isEqualToString:@"家电佳肴"] || [main.name isEqualToString:@"厨娘私房菜"]) {
+                 
+                 } else {
+                 [self.listAry addObject:main];
+                 
+                 }
                  */
                 
                 if ([deleteAry containsObject:main.name]) {
@@ -272,7 +271,7 @@
                 } else {
                     
                     [self.listAry addObject:main];
-
+                    
                 }
                 
             }
@@ -286,8 +285,12 @@
         
         
         [self.collectionView reloadData];
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        
+        
     }];
-   
+    
 }
 
 
@@ -367,7 +370,7 @@
 //动态设置每个分区的缩进量
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
 {
-        return UIEdgeInsetsMake(0, 0, 0, 0);
+    return UIEdgeInsetsMake(0, 0, 0, 0);
 }
 
 
