@@ -1,0 +1,31 @@
+//
+//  PrefixHeader.pch
+//  ZXCook
+//
+//  Created by 张祥 on 15/8/17.
+//  Copyright (c) 2015年 张祥. All rights reserved.
+//
+
+#ifndef ZXCook_PrefixHeader_pch
+#define ZXCook_PrefixHeader_pch
+
+
+#import <UIKit/UIKit.h>
+#import "UIViewAdditions.h"
+#import "UIImageView+WebCache.h"
+#import "MJRefresh.h"
+#import "SVProgressHUD.h"
+
+
+#define kScreenWidth [UIScreen mainScreen].bounds.size.width
+#define kScreenHeight [UIScreen mainScreen].bounds.size.height
+
+#define kItem_Height 40
+
+//每行显示几个Item
+#define kItem_Number 3
+
+//展开之后每行显示几个Item
+#define kDetail_Item_Number 3
+
+#endif
